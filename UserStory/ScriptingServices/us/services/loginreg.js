@@ -12,7 +12,6 @@ var commonUtils = require('us/utils/commonUtils');
 dispatchRequest(request, response);
 
 function dispatchRequest(httpRequest, httpResponse) {
-	userDao.delete(1);
 	switch(httpRequest.getMethod()) {
 		case 'POST': 
 			handlePostRequest(httpRequest, httpResponse);
