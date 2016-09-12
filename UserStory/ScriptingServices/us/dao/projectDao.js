@@ -23,7 +23,7 @@ exports.get = function(id) {
 };
 
 exports.getByUserId = function(userId) {
-	var result = null;
+	var result = [];
 	var connection = datasource.getConnection();
     try {
         var sql = "SELECT * FROM US_PROJECT WHERE TOKEN_ID = ?";
@@ -31,8 +31,8 @@ exports.getByUserId = function(userId) {
         statement.setString(1, userId);
 
         var resultSet = statement.executeQuery();
-        if (resultSet.next()) {
-            result = createEntity(resultSet);
+        while (resultSet.next()) {
+            result.push(createEntity(resultSet));
         }
     } finally {
     	connection.close();
@@ -68,6 +68,30 @@ exports.update = function(project) {
     	connection.close();
 	}
 	return project;
+};
+
+exports.delete = function(id) {
+	var connection = datasource.getConnection();
+    try {
+        var sql = "DELETE FROM US_PROJECT WHERE PROJECT_ID = ?";
+        var statement = connection.prepareStatement(sql);
+        statement.setInt(1, id);
+        statement.executeUpdate();
+    } finally {
+    	connection.close();
+	}
+};
+
+exports.deleteByUserId = function(userId) {
+	var connection = datasource.getConnection();
+    try {
+        var sql = "DELETE FROM US_PROJECT WHERE TOKEN_ID = ?";
+        var statement = connection.prepareStatement(sql);
+        statement.setString(1, userId);
+        statement.executeUpdate();
+    } finally {
+    	connection.close();
+	}
 };
 
 function createEntity(resultSet) {

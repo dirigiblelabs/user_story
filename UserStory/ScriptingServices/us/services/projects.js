@@ -20,7 +20,7 @@ function dispatchRequest(httpRequest, httpResponse) {
 			handlePostRequest(httpRequest, httpResponse);
 			break;
 		case 'DELETE':
-			// TODO 
+			handleDeleteRequest(httpRequest, httpResponse);
 			break;
 		default:
 			handleNotAllowedRequest(httpResponse);
@@ -33,7 +33,6 @@ function handleGetRequest(httpRequest, httpResponse) {
 	
 	if (projectId && userId) {
 		httpUtils.sendResponse(httpResponse, httpResponse.BAD_REQUEST, 'text/plain', 'Only one of the \'projectId\' or \'userId\' query parameters should be supplied');
-	} else if (!projectId && !userId) {
 	} else if (projectId) {
 		var project = projectDao.get(projectId);
 		if (project) {
@@ -43,11 +42,7 @@ function handleGetRequest(httpRequest, httpResponse) {
 		}
 	} else if (userId) {
 		var projects = projectDao.getByUserId(userId);
-		if (projects) {
-			httpUtils.sendResponse(httpResponse, httpResponse.OK, 'application/json', JSON.stringify(projects));
-		} else {
-			httpUtils.sendResponse(httpResponse, httpResponse.NOT_FOUND, 'text/plain', 'No projects found with \'userId\'=' + userId);
-		}
+		httpUtils.sendResponse(httpResponse, httpResponse.OK, 'application/json', JSON.stringify(projects));
 	} else {
 		httpUtils.sendResponse(httpResponse, httpResponse.BAD_REQUEST, 'text/plain', 'Either \'projectId\' or \'userId\' query parameter should be supplied');
 	}
@@ -73,6 +68,32 @@ function handlePostRequest(httpRequest, httpResponse) {
 		}
 	} else {
 		httpUtils.sendResponse(httpResponse, httpResponse.BAD_REQUEST);
+	}
+}
+
+function handleDeleteRequest(httpRequest, httpResponse) {
+	var projectId = httpRequest.getParameter('projectId');
+	var userId = httpRequest.getParameter('userId');
+		
+	if (projectId && userId) {
+		httpUtils.sendResponse(httpResponse, httpResponse.BAD_REQUEST, 'text/plain', 'Only one of the \'projectId\' or \'userId\' query parameters should be supplied');
+	} else if (projectId) {
+		var project = projectDao.get(projectId);
+		if (project) {
+			projectDao.delete(projectId);
+			httpUtils.sendResponse(httpResponse, httpResponse.OK);
+		} else {
+			httpUtils.sendResponse(httpResponse, httpResponse.NOT_FOUND, 'text/plain', 'No project found with \'projectId\'=' + projectId);
+		}
+	} else if (userId) {
+		if (projectDao.getByUserId(userId)) {
+			projectDao.deleteByUserId(userId);
+			httpUtils.sendResponse(httpResponse, httpResponse.OK);
+		} else {
+			httpUtils.sendResponse(httpResponse, httpResponse.NOT_FOUND, 'text/plain', 'No projects found with \'userId\'=' + userId);
+		}
+	} else {
+		httpUtils.sendResponse(httpResponse, httpResponse.BAD_REQUEST, 'text/plain', 'Either \'projectId\' or \'userId\' query parameter should be supplied');
 	}
 }
 
